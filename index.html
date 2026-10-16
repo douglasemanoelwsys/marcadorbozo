@@ -1,0 +1,233 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Marcador Bozó</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+/* Layout: mesa de feltro — cabeçalho com placar, abas de jogador, cartela 3x4 igual ao papel */
+:root{
+  --felt:#788a9b; --felt-2:#34495e; --bone:#f5f7f9; --ink:#1f2a35; --muted:#66778a;
+  --line:#d3dbe3; --gold:#d9a441; --scratch:#b2483a; --boca:#2f6db5;
+  --bg:#e9eef3; --card:#ffffff;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Nunito Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --felt:#3e5163; --felt-2:#1f2d3b; --bone:#eef2f6; --ink:#e6ebf0; --muted:#94a3b3;
+  --line:#2a3746; --gold:#e3b456; --scratch:#e0725f; --boca:#7fb0ea;
+  --bg:#121a23; --card:#1a2430; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --felt:#3e5163; --felt-2:#1f2d3b; --bone:#eef2f6; --ink:#e6ebf0; --muted:#94a3b3;
+  --line:#2a3746; --gold:#e3b456; --scratch:#e0725f; --boca:#7fb0ea;
+  --bg:#121a23; --card:#1a2430; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body)}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto}
+header{background:var(--felt);color:#f3efe2;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 0}
+.top{display:flex;align-items:center;gap:8px}
+.top h1{font-family:var(--display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:22px;margin:0;flex:1}
+.icon{background:transparent;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:6px 10px;font-size:13px;font-weight:700;color:#f3efe2}
+.score{text-align:center;padding:6px 0 10px}
+.score .n{font-family:var(--display);font-size:84px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums}
+.score .who{font-size:13px;opacity:.8;letter-spacing:.08em;text-transform:uppercase}
+.score .left{font-size:12px;opacity:.7;margin-top:4px}
+.tabs{display:flex;overflow-x:auto;gap:2px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;background:var(--felt-2);border:0;padding:12px 16px;font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:.05em;text-transform:uppercase;color:rgba(243,239,226,.55);border-radius:8px 8px 0 0}
+.tab.on{background:var(--bg);color:var(--ink)}
+.tab .pts{font-size:13px;opacity:.75;margin-left:6px;font-variant-numeric:tabular-nums}
+main{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 28px;display:grid;gap:16px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.cell{background:var(--card);border:0;aspect-ratio:1/0.82;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:8px 4px 10px;position:relative;min-width:0}
+.cell.blank{background:var(--bg);pointer-events:none}
+.cell .v{flex:1;display:flex;align-items:center;font-family:var(--display);font-size:40px;font-weight:600;font-variant-numeric:tabular-nums}
+.cell .lbl{font-size:13px;color:var(--muted);font-weight:600}
+.cell .tag{position:absolute;top:6px;right:8px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--boca)}
+.cell.x .v{color:var(--scratch);font-size:34px}
+.cell.done{background:color-mix(in srgb,var(--card) 88%,var(--felt))}
+.cell:active{filter:brightness(.95)}
+.board h2{font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.tblw{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:14px}
+th,td{padding:7px 10px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;color:var(--muted);font-weight:600}
+thead th{font-family:var(--display);font-size:15px;letter-spacing:.04em}
+tfoot td{font-weight:700;font-size:16px;border-bottom:0}
+td.x{color:var(--scratch)}
+.lead{color:var(--gold)}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:10px 14px;font-weight:700;font-size:14px}
+.btn.pri{background:var(--felt);color:#f3efe2;border-color:var(--felt)}
+.btn.danger{color:var(--scratch)}
+/* sheet */
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{background:var(--card);width:100%;max-width:560px;border-radius:16px 16px 0 0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px calc(18px + env(safe-area-inset-bottom,0px));display:grid;gap:12px;max-height:88vh;overflow:auto}
+.sheet h3{margin:0;font-family:var(--display);font-size:26px;font-weight:700}
+.sheet p{margin:0;color:var(--muted);font-size:13px}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.opt{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:12px 6px;display:grid;gap:2px;text-align:center}
+.opt b{font-family:var(--display);font-size:28px;font-weight:600}
+.opt span{font-size:12px;color:var(--muted)}
+.opt.boca{border-color:var(--boca)} .opt.boca span{color:var(--boca);font-weight:700}
+.opt.x b{color:var(--scratch)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .btn{flex:1}
+.field{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
+.field input{font:inherit;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+.cfg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.plist{display:grid;gap:8px}
+.prow{display:flex;gap:8px;align-items:center}
+.prow input{flex:1;min-width:0}
+.win{font-family:var(--display);font-size:20px;font-weight:700;color:var(--gold);text-align:center}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="top">
+    <h1>Marcador Bozó</h1>
+    <button class="icon" id="bPlayers">Jogadores</button>
+    <button class="icon" id="bCfg">Regras</button>
+  </div>
+  <div class="score"><div class="who" id="who"></div><div class="n" id="total">0</div><div class="left" id="left"></div></div>
+  <div class="tabs" id="tabs" role="tablist"></div>
+</header>
+<main>
+  <div class="grid" id="grid"></div>
+  <section class="board"><h2>Placar geral</h2><div class="tblw"><table id="tbl"></table></div></section>
+  <div class="actions">
+    <button class="btn" id="bUndo">Desfazer última</button>
+    <button class="btn danger" id="bNew">Nova partida</button>
+  </div>
+</main>
+</div>
+<div id="modal"></div>
+
+<script>
+const CATS=[
+ {k:'as',n:'Áz',face:1},{k:'full',n:'Full'},{k:'quadra',n:'Quadra',face:4},
+ {k:'duque',n:'Duque',face:2},{k:'seguida',n:'Seguida'},{k:'quina',n:'Quina',face:5},
+ {k:'terno',n:'Terno',face:3},{k:'quadrada',n:'Quadrada'},{k:'sena',n:'Sena',face:6},
+ null,{k:'general',n:'General'},null];
+const ALL=CATS.filter(Boolean);
+const DEF_CFG={full:10,seguida:20,quadrada:30,general:40,boca:5};
+const CFG_KEYS=Object.keys(DEF_CFG);
+const winnerIdx=()=>S.players.findIndex(p=>p.sc.general?.win);
+let S=load()||{players:[mk('Jogador 1'),mk('Jogador 2')],cur:0,cfg:{...DEF_CFG},hist:[]};
+function mk(name){return{name,sc:{}}}
+function load(){try{return JSON.parse(localStorage.getItem('bozo'))}catch(e){return null}}
+function save(){try{localStorage.setItem('bozo',JSON.stringify(S))}catch(e){}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tot=p=>ALL.reduce((a,c)=>a+(p.sc[c.k]?.v||0),0);
+const filled=p=>ALL.filter(c=>p.sc[c.k]).length;
+
+function render(){
+  const p=S.players[S.cur];
+  $('who').textContent=p.name;
+  $('total').textContent=tot(p);
+  const f=filled(p);
+  $('left').textContent=f===10?'Cartela completa':`${10-f} casa${10-f>1?'s':''} em aberto`;
+  $('tabs').innerHTML=S.players.map((q,i)=>`<button class="tab${i===S.cur?' on':''}" role="tab" data-i="${i}">${esc(q.name)}<span class="pts">${tot(q)}</span></button>`).join('');
+  $('grid').innerHTML=CATS.map(c=>{
+    if(!c)return'<div class="cell blank"></div>';
+    const s=p.sc[c.k];
+    let v='',cls='cell',tag='';
+    if(s){cls+=' done';if(s.x){cls+=' x';v='✕'}else if(s.win){v='★'}else v=s.v;if(s.boca)tag=`<span class="tag">${s.win?'bateu':'de boca'}</span>`}
+    return`<button class="${cls}" data-k="${c.k}">${tag}<span class="v">${v}</span><span class="lbl">${c.n}</span></button>`;
+  }).join('');
+  // tabela
+  const max=Math.max(...S.players.map(tot));
+  let h='<thead><tr><th></th>'+S.players.map(q=>`<th>${esc(q.name)}</th>`).join('')+'</tr></thead><tbody>';
+    const wi=winnerIdx();
+  ALL.forEach(c=>{h+=`<tr><td>${c.n}</td>`+S.players.map(q=>{const s=q.sc[c.k];return s?(s.x?'<td class="x">✕</td>':s.win?'<td class="lead">★</td>':`<td>${s.v}${s.boca?'*':''}</td>`):'<td>·</td>'}).join('')+'</tr>'});
+  h+='</tbody><tfoot><tr><td>Total</td>'+S.players.map((q,i)=>{const t=tot(q);const lead=wi>=0?i===wi:(t===max&&t>0);return`<td class="${lead?'lead':''}">${wi===i?'Bateu':t}</td>`}).join('')+'</tr></tfoot>';
+  $('tbl').innerHTML=h;
+  $('bUndo').disabled=!S.hist.length;
+  save();
+  checkEnd();
+}
+function rankPlayers(){
+  const wi=winnerIdx();
+  const order=S.players.map((p,i)=>i).sort((a,b)=>(b===wi)-(a===wi)||tot(S.players[b])-tot(S.players[a]));
+  const inv={};order.forEach((o,n)=>inv[o]=n);
+  S.players=order.map(i=>S.players[i]);
+  S.hist.forEach(h=>{h.pi=inv[h.pi]});
+  S.cur=0;
+}
+let endShown=false;
+function checkEnd(){
+  const wi=winnerIdx();
+  if(wi>=0){if(!endShown){endShown=true;rankPlayers();render();
+    sheet(`<h3>General de boca!</h3><div class="win">${esc(S.players[0].name)} bateu e venceu a partida</div><div class="row"><button class="btn" data-close>Ver placar</button><button class="btn pri" id="again">Jogar de novo</button></div>`);
+    $('again').onclick=()=>{reset();close()};}return;}
+  const done=S.players.every(q=>filled(q)===10);
+  if(done&&!endShown){endShown=true;rankPlayers();render();const max=Math.max(...S.players.map(tot));const w=S.players.filter(q=>tot(q)===max).map(q=>q.name).join(' e ');
+    sheet(`<h3>Fim de jogo</h3><div class="win">${esc(w)} ${w.includes(' e ')?'empataram':'venceu'} com ${max} pontos</div><div class="row"><button class="btn" data-close>Ver placar</button><button class="btn pri" id="again">Jogar de novo</button></div>`);
+    $('again').onclick=()=>{reset();close()};}
+  if(!done)endShown=false;
+}
+function setScore(k,val){
+  const p=S.players[S.cur];
+  S.hist.push({pi:S.cur,k,prev:p.sc[k]||null});
+  if(val===null)delete p.sc[k];else p.sc[k]=val;
+  close();
+  // avança para o próximo jogador ao marcar
+  if(val!==null&&!val.win&&S.players.length>1)S.cur=(S.cur+1)%S.players.length;
+  render();
+}
+function openCat(k){
+  const c=ALL.find(x=>x.k===k),cf=S.cfg,cur=S.players[S.cur].sc[k];
+  let opts='';
+  if(c.face){
+    for(let n=1;n<=5;n++)opts+=`<button class="opt" data-v="${n*c.face}"><b>${n*c.face}</b><span>${n} dado${n>1?'s':''}</span></button>`;
+    opts+=`<button class="opt x" data-x="1"><b>✕</b><span>riscar</span></button>`;
+  }else{
+    opts+=`<button class="opt" data-v="${cf[k]}"><b>${cf[k]}</b><span>feito</span></button>`;
+    opts+=k==='general'
+      ?`<button class="opt boca" data-v="${cf.general}" data-b="1" data-w="1"><b>★</b><span>de boca: vence</span></button>`
+      :`<button class="opt boca" data-v="${cf[k]+cf.boca}" data-b="1"><b>${cf[k]+cf.boca}</b><span>de boca</span></button>`;
+    opts+=`<button class="opt x" data-x="1"><b>✕</b><span>riscar</span></button>`;
+  }
+  const hint=c.face?`Soma dos dados que mostram ${c.face}.`:{full:'Trinca + par.',seguida:'1-2-3-4-5 ou 2-3-4-5-6.',quadrada:'Quatro dados iguais.',general:'Cinco dados iguais.'}[k];
+  sheet(`<h3>${c.n} · ${esc(S.players[S.cur].name)}</h3><p>${hint}</p><div class="opts">${opts}</div>
+   <div class="row">${cur?'<button class="btn danger" id="clr">Limpar casa</button>':''}<button class="btn" data-close>Cancelar</button></div>`);
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>setScore(k,b.dataset.x?{v:0,x:1}:{v:+b.dataset.v,boca:!!b.dataset.b,win:!!b.dataset.w}));
+  if(cur)$('clr').onclick=()=>setScore(k,null);
+}
+function sheet(html){$('modal').innerHTML=`<div class="veil"><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  const v=$('modal').firstChild;v.onclick=e=>{if(e.target===v||e.target.hasAttribute('data-close'))close()};}
+function close(){$('modal').innerHTML=''}
+function reset(){S.players.forEach(p=>p.sc={});S.cur=0;S.hist=[];endShown=false;render()}
+
+$('tabs').onclick=e=>{const b=e.target.closest('.tab');if(b){S.cur=+b.dataset.i;render()}};
+$('grid').onclick=e=>{const b=e.target.closest('.cell[data-k]');if(b)openCat(b.dataset.k)};
+$('bUndo').onclick=()=>{const h=S.hist.pop();if(!h)return;const p=S.players[h.pi];if(!p){render();return}
+  if(h.prev)p.sc[h.k]=h.prev;else delete p.sc[h.k];S.cur=h.pi;render()};
+$('bNew').onclick=()=>{sheet(`<h3>Nova partida?</h3><p>Zera a cartela de todos e mantém os jogadores.</p><div class="row"><button class="btn" data-close>Cancelar</button><button class="btn pri" id="ok">Zerar</button></div>`);$('ok').onclick=()=>{reset();close()}};
+$('bPlayers').onclick=players;
+function players(){
+  const rows=S.players.map((p,i)=>`<div class="prow"><input class="field-in" id="pn${i}" value="${esc(p.name)}" aria-label="Nome do jogador ${i+1}"><button class="btn danger" data-rm="${i}" ${S.players.length<2?'disabled':''}>Remover</button></div>`).join('');
+  sheet(`<h3>Jogadores</h3><div class="plist field">${rows}</div><div class="row"><button class="btn" id="add">+ Adicionar</button><button class="btn pri" id="sv">Salvar</button></div>`);
+  document.querySelectorAll('.prow input').forEach(i=>Object.assign(i.style,{font:'inherit',fontSize:'16px',padding:'10px',border:'1px solid var(--line)',borderRadius:'8px',background:'var(--bg)',color:'var(--ink)'}));
+  const keep=()=>S.players.forEach((p,i)=>{const v=$('pn'+i)?.value.trim();if(v)p.name=v});
+  $('add').onclick=()=>{keep();S.players.push(mk('Jogador '+(S.players.length+1)));players()};
+  document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{keep();S.players.splice(+b.dataset.rm,1);S.hist=[];S.cur=Math.min(S.cur,S.players.length-1);players()});
+  $('sv').onclick=()=>{keep();close();render()};
+}
+$('bCfg').onclick=()=>{
+  const f=(k,l)=>`<label class="field">${l}<input type="number" inputmode="numeric" id="c_${k}" value="${S.cfg[k]}"></label>`;
+  sheet(`<h3>Pontuação</h3><p>Jogada de boca soma o bônus ao valor. General de boca encerra a partida.</p>
+   <div class="cfg">${f('full','Full')}${f('seguida','Seguida')}${f('quadrada','Quadrada')}${f('general','General')}${f('boca','Bônus de boca')}</div>
+   <div class="row"><button class="btn" id="def">Voltar ao padrão</button><button class="btn pri" id="sv">Salvar</button></div>`);
+  $('def').onclick=()=>{CFG_KEYS.forEach(k=>$('c_'+k).value=DEF_CFG[k])};
+  $('sv').onclick=()=>{CFG_KEYS.forEach(k=>{const v=parseInt($('c_'+k).value,10);if(!isNaN(v))S.cfg[k]=v});close();render()};
+};
+// garante cfg completa em dados antigos
+if(S.cfgV!==2){S.cfg={...DEF_CFG};S.cfgV=2}
+S.cfg={...DEF_CFG,...S.cfg};
+render();
+</script>
+
+</body></html>
